@@ -113,6 +113,16 @@ class WordpressFinder {
             $this->webRoot = $path . '/' . $json['extra']['webroot-dir'];
             $this->composerRoot = $path;
           }
+          // Is it a leymannx/wordpress-project based project?
+          // https://github.com/leymannx/wordpress-project
+          elseif (isset($json['extra']['custom-installer']) && is_array($json['extra']['custom-installer'])) {
+            foreach ($json['extra']['custom-installer'] as $install_path => $items) {
+              if (in_array('type:wordpress-core', $items)) {
+                $this->webRoot = rtrim($path . '/' . $install_path, '/');
+                $this->composerRoot = $path;
+              }
+            }
+          }
 
           if ($this->composerRoot) {
             $this->vendorDir = isset($json['config']['vendor-dir']) ? $this->composerRoot . '/' . $json['config']['vendor-dir'] : $this->composerRoot . '/vendor';
