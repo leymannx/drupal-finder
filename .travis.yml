@@ -13,4 +13,5 @@ install:
   - composer --verbose install
 
 script:
-  - ./vendor/bin/phpunit
+  - phpunit --version
+      
