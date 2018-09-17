@@ -137,71 +137,72 @@ class WordpressFinder {
           // for example roots/bedrock?
           // https://composer.rarst.net/recipe/site-stack/
           if (isset($json['extra']['wordpress-install-dir'])) {
-            $this->webRoot = $path . '/' . rtrim($json['extra']['wordpress-install-dir'], '/');
             $this->composerRoot = $path;
+            $this->webRoot = rtrim($path . '/' . $json['extra']['wordpress-install-dir'], '/');
           }
           // Is it a fancyguy/webroot-installer based project?
           // https://github.com/fancyguy/webroot-installer
           elseif (isset($json['extra']['webroot-dir'])) {
-            $this->webRoot = $path . '/' . rtrim($json['extra']['webroot-dir'], '/');
             $this->composerRoot = $path;
+            $this->webRoot = rtrim($path . '/' . $json['extra']['webroot-dir'], '/');
           }
           // Is it a leymannx/wordpress-project based project?
           // https://github.com/leymannx/wordpress-project
           elseif (isset($json['extra']['custom-installer']) && is_array($json['extra']['custom-installer'])) {
             foreach ($json['extra']['custom-installer'] as $install_path => $items) {
               if (in_array('type:wordpress-core', $items)) {
-                $this->webRoot = rtrim($path . '/' . $install_path, '/');
                 $this->composerRoot = $path;
+                $this->webRoot = rtrim($path . '/' . $install_path, '/');
               }
             }
           }
 
           // Vendor directory configured? If no, take the default.
           if ($this->composerRoot) {
-            $this->vendorDir = isset($json['config']['vendor-dir']) ? $this->composerRoot . '/' . $json['config']['vendor-dir'] : $this->composerRoot . '/vendor';
+            $this->vendorDir = isset($json['config']['vendor-dir']) ? $this->composerRoot . '/' . rtrim($json['config']['vendor-dir'], '/') : $this->composerRoot . '/vendor';
           }
 
-          $composer_installer = [
-            'installer-paths',
-            'custom-installer',
-          ];
-
           // Plugin and theme installer paths configured?
-          foreach ($composer_installer as $installer) {
-            if (isset($json['extra'][$installer]) && is_array($json['extra'][$installer])) {
-              foreach ($json['extra'][$installer] as $install_path => $items) {
-                if (in_array('type:wordpress-plugin', $items)) {
-                  $this->pluginsDir = rtrim($path . '/' . $install_path, '/');
-                }
-                if (in_array('type:wordpress-muplugin', $items)) {
-                  $this->muPluginsDir = rtrim($path . '/' . $install_path, '/');
-                }
-                if (in_array('type:wordpress-theme', $items)) {
-                  $this->themesDir = rtrim($path . '/' . $install_path, '/');
-                }
-                if (in_array('type:wordpress-dropin', $items)) {
-                  $this->dropinsDir = rtrim($path . '/' . $install_path, '/');
+          if ($this->webRoot) {
+
+            $composer_installer = [
+              'installer-paths',
+              'custom-installer',
+            ];
+
+            foreach ($composer_installer as $installer) {
+              if (isset($json['extra'][$installer]) && is_array($json['extra'][$installer])) {
+                foreach ($json['extra'][$installer] as $install_path => $items) {
+                  if (in_array('type:wordpress-plugin', $items)) {
+                    $this->pluginsDir = rtrim($path . '/' . $install_path, '/');
+                  }
+                  if (in_array('type:wordpress-muplugin', $items)) {
+                    $this->muPluginsDir = rtrim($path . '/' . $install_path, '/');
+                  }
+                  if (in_array('type:wordpress-theme', $items)) {
+                    $this->themesDir = rtrim($path . '/' . $install_path, '/');
+                  }
+                  if (in_array('type:wordpress-dropin', $items)) {
+                    $this->dropinsDir = rtrim($path . '/' . $install_path, '/');
+                  }
                 }
               }
             }
-          }
-        }
 
-        if ($this->webRoot) {
-          // If no plugin and theme installer paths configured above,
-          // take the defaults.
-          if (!$this->pluginsDir) {
-            $this->pluginsDir = $this->webRoot . '/wp-content/plugins';
-          }
-          if (!$this->muPluginsDir) {
-            $this->muPluginsDir = $this->webRoot . '/wp-content/mu-plugins';
-          }
-          if (!$this->themesDir) {
-            $this->pluginsDir = $this->webRoot . '/wp-content/themes';
-          }
-          if (!$this->dropinsDir) {
-            $this->dropinsDir = $this->webRoot . '/wp-content';
+            // If no plugin and theme installer paths configured (above),
+            // take the defaults.
+            if (!$this->pluginsDir) {
+              $this->pluginsDir = $this->webRoot . '/wp-content/plugins';
+            }
+            if (!$this->muPluginsDir) {
+              $this->muPluginsDir = $this->webRoot . '/wp-content/mu-plugins';
+            }
+            if (!$this->themesDir) {
+              $this->pluginsDir = $this->webRoot . '/wp-content/themes';
+            }
+            if (!$this->dropinsDir) {
+              $this->dropinsDir = $this->webRoot . '/wp-content';
+            }
           }
         }
       }
