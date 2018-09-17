@@ -61,7 +61,7 @@ class WordpressFinder {
   private $dropinsDir;
 
   /**
-   * @param $start_path
+   * @param string $start_path
    *
    * @return bool
    */
@@ -102,11 +102,11 @@ class WordpressFinder {
   /**
    * Returns parent directory.
    *
-   * @param string
-   *   Path to start from
+   * @param string $path
+   *   Path to start from.
    *
    * @return string|false
-   *   Parent path of given path or false when $path is filesystem root
+   *   Parent path of given path or false when $path is filesystem root.
    */
   private function shiftPathUp($path) {
     $parent = dirname($path);
@@ -115,9 +115,9 @@ class WordpressFinder {
   }
 
   /**
-   * @param $path
+   * @param string $path
    *
-   * @return bool
+   * @return mixed
    */
   protected function isValidRoot($path) {
 
@@ -174,16 +174,16 @@ class WordpressFinder {
               if (isset($json['extra'][$installer]) && is_array($json['extra'][$installer])) {
                 foreach ($json['extra'][$installer] as $install_path => $items) {
                   if (in_array('type:wordpress-plugin', $items)) {
-                    $this->pluginsDir = rtrim($path . '/' . $install_path, '/');
+                    $this->pluginsDir = $path . '/' . $this->sanitizeInstallerPath($install_path);
                   }
                   if (in_array('type:wordpress-muplugin', $items)) {
-                    $this->muPluginsDir = rtrim($path . '/' . $install_path, '/');
+                    $this->muPluginsDir = $path . '/' . $this->sanitizeInstallerPath($install_path);
                   }
                   if (in_array('type:wordpress-theme', $items)) {
-                    $this->themesDir = rtrim($path . '/' . $install_path, '/');
+                    $this->themesDir = $path . '/' . $this->sanitizeInstallerPath($install_path);
                   }
                   if (in_array('type:wordpress-dropin', $items)) {
-                    $this->dropinsDir = rtrim($path . '/' . $install_path, '/');
+                    $this->dropinsDir = $path . '/' . $this->sanitizeInstallerPath($install_path);
                   }
                 }
               }
@@ -265,6 +265,20 @@ class WordpressFinder {
    */
   public function getDropinsDir() {
     return $this->dropinsDir;
+  }
+
+  /**
+   * Remove possible {token} from an installer path.
+   *
+   * @param string $install_path
+   *
+   * @return string
+   */
+  protected function sanitizeInstallerPath($install_path) {
+    $install_path = rtrim($install_path, '/');
+    $install_path = preg_replace('/\{[^}]+\}/', '', $install_path);
+    $install_path = rtrim($install_path, '/');
+    return $install_path;
   }
 
 }
