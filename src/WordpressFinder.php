@@ -33,6 +33,34 @@ class WordpressFinder {
   private $vendorDir;
 
   /**
+   * Vendor plugins directory.
+   *
+   * @var bool
+   */
+  private $pluginsDir;
+
+  /**
+   * Vendor mu-plugins directory.
+   *
+   * @var bool
+   */
+  private $muPluginsDir;
+
+  /**
+   * Vendor themes directory.
+   *
+   * @var bool
+   */
+  private $themesDir;
+
+  /**
+   * Vendor dropins directory.
+   *
+   * @var bool
+   */
+  private $dropinsDir;
+
+  /**
    * @param $start_path
    *
    * @return bool
@@ -41,6 +69,10 @@ class WordpressFinder {
     $this->webRoot = FALSE;
     $this->composerRoot = FALSE;
     $this->vendorDir = FALSE;
+    $this->pluginsDir = FALSE;
+    $this->muPluginsDir = FALSE;
+    $this->themesDir = FALSE;
+    $this->dropinsDir = FALSE;
 
     foreach ([TRUE, FALSE] as $follow_symlinks) {
       $path = $start_path;
@@ -101,16 +133,17 @@ class WordpressFinder {
 
         if (is_array($json)) {
 
-          // Is it a johnpbloch/wordpress based project?
+          // Is it a johnpbloch/wordpress based project,
+          // for example roots/bedrock?
           // https://composer.rarst.net/recipe/site-stack/
           if (isset($json['extra']['wordpress-install-dir'])) {
-            $this->webRoot = $path . '/' . $json['extra']['wordpress-install-dir'];
+            $this->webRoot = $path . '/' . rtrim($json['extra']['wordpress-install-dir'], '/');
             $this->composerRoot = $path;
           }
           // Is it a fancyguy/webroot-installer based project?
           // https://github.com/fancyguy/webroot-installer
           elseif (isset($json['extra']['webroot-dir'])) {
-            $this->webRoot = $path . '/' . $json['extra']['webroot-dir'];
+            $this->webRoot = $path . '/' . rtrim($json['extra']['webroot-dir'], '/');
             $this->composerRoot = $path;
           }
           // Is it a leymannx/wordpress-project based project?
@@ -124,14 +157,57 @@ class WordpressFinder {
             }
           }
 
+          // Vendor directory configured? If no, take the default.
           if ($this->composerRoot) {
             $this->vendorDir = isset($json['config']['vendor-dir']) ? $this->composerRoot . '/' . $json['config']['vendor-dir'] : $this->composerRoot . '/vendor';
+          }
+
+          $composer_installer = [
+            'installer-paths',
+            'custom-installer',
+          ];
+
+          // Plugin and theme installer paths configured?
+          foreach ($composer_installer as $installer) {
+            if (isset($json['extra'][$installer]) && is_array($json['extra'][$installer])) {
+              foreach ($json['extra'][$installer] as $install_path => $items) {
+                if (in_array('type:wordpress-plugin', $items)) {
+                  $this->pluginsDir = rtrim($path . '/' . $install_path, '/');
+                }
+                if (in_array('type:wordpress-muplugin', $items)) {
+                  $this->muPluginsDir = rtrim($path . '/' . $install_path, '/');
+                }
+                if (in_array('type:wordpress-theme', $items)) {
+                  $this->themesDir = rtrim($path . '/' . $install_path, '/');
+                }
+                if (in_array('type:wordpress-dropin', $items)) {
+                  $this->dropinsDir = rtrim($path . '/' . $install_path, '/');
+                }
+              }
+            }
+          }
+        }
+
+        if ($this->webRoot) {
+          // If no plugin and theme installer paths configured above,
+          // take the defaults.
+          if (!$this->pluginsDir) {
+            $this->pluginsDir = $this->webRoot . '/wp-content/plugins';
+          }
+          if (!$this->muPluginsDir) {
+            $this->muPluginsDir = $this->webRoot . '/wp-content/mu-plugins';
+          }
+          if (!$this->themesDir) {
+            $this->pluginsDir = $this->webRoot . '/wp-content/themes';
+          }
+          if (!$this->dropinsDir) {
+            $this->dropinsDir = $this->webRoot . '/wp-content';
           }
         }
       }
     }
 
-    return $this->webRoot && $this->composerRoot && $this->vendorDir;
+    return $this->webRoot && $this->composerRoot && $this->vendorDir && $this->pluginsDir && $this->muPluginsDir && $this->themesDir && $this->dropinsDir;
   }
 
   /**
@@ -161,4 +237,33 @@ class WordpressFinder {
   public function getVendorDir() {
     return $this->vendorDir;
   }
+
+  /**
+   * @return string
+   */
+  public function getPluginsDir() {
+    return $this->vendorDir;
+  }
+
+  /**
+   * @return string
+   */
+  public function getMuPluginsDir() {
+    return $this->vendorDir;
+  }
+
+  /**
+   * @return string
+   */
+  public function getThemesDir() {
+    return $this->vendorDir;
+  }
+
+  /**
+   * @return string
+   */
+  public function getDropinsDir() {
+    return $this->vendorDir;
+  }
+
 }
