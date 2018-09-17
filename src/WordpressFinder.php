@@ -243,28 +243,28 @@ class WordpressFinder {
    * @return string
    */
   public function getPluginsDir() {
-    return $this->vendorDir;
+    return $this->pluginsDir;
   }
 
   /**
    * @return string
    */
   public function getMuPluginsDir() {
-    return $this->vendorDir;
+    return $this->muPluginsDir;
   }
 
   /**
    * @return string
    */
   public function getThemesDir() {
-    return $this->vendorDir;
+    return $this->themesDir;
   }
 
   /**
    * @return string
    */
   public function getDropinsDir() {
-    return $this->vendorDir;
+    return $this->dropinsDir;
   }
 
 }
