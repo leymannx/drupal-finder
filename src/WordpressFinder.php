@@ -276,7 +276,7 @@ class WordpressFinder {
    */
   protected function sanitizeInstallerPath($install_path) {
     $install_path = rtrim($install_path, '/');
-    $install_path = preg_replace('/\{[^}]+\}/', '', $install_path);
+    $install_path = trim(preg_replace('/\s*\{[^}]*\}/', '', $install_path));
     $install_path = rtrim($install_path, '/');
     return $install_path;
   }
