@@ -115,6 +115,16 @@ class WordpressFinder {
           }
           // Is it a leymannx/wordpress-project based project?
           // https://github.com/leymannx/wordpress-project
+          elseif (isset($json['extra']['installer-paths']) && is_array($json['extra']['installer-paths'])) {
+            foreach ($json['extra']['installer-paths'] as $install_path => $items) {
+              if (in_array('type:wordpress-core', $items)) {
+                $this->webRoot = rtrim($path . '/' . $install_path, '/');
+                $this->composerRoot = $path;
+              }
+            }
+          }
+          // Is it a LEGACY leymannx/wordpress-project based project?
+          // https://github.com/leymannx/wordpress-project
           elseif (isset($json['extra']['custom-installer']) && is_array($json['extra']['custom-installer'])) {
             foreach ($json['extra']['custom-installer'] as $install_path => $items) {
               if (in_array('type:wordpress-core', $items)) {
